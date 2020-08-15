@@ -1,0 +1,129 @@
+
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec 17 13:04:36 2019
+
+@author: lin
+"""
+
+
+from classe.Weekend_days import *
+from classe.Cost_function import *
+
+
+data_reduc = pd.read_csv(os.path.join(mug_data_path,'sample_reduc_2_d.csv'))
+#data_sort=data_reduc.sort_values(by=['difficulty'], ascending=False)
+
+
+cost_function = build_cost_function(data,N_DAYS=100)
+#cost_function = build_cost_function(data)
+#original = submission['assigned_day'].values
+#best=original = submission['assigned_day'].values
+#original_score = cost_function(best)
+
+"""
+l = [random.randrange(1,30) for i in range(2500)]
+best=np.asarray(l)
+best_score = cost_function(best)
+choice_matrix = data_reduc.loc[:, 'choice_0': 'choice_9'].values
+
+"""
+
+best=submission['assigned_day'].values
+best_score = cost_function(best)
+
+# Start with the sample submission values
+
+days = list(range(100,0,-1))
+family_size_dict = data[['n_people']].to_dict()['n_people']
+cols = [f'choice_{i}' for i in range(10)]
+choice_dict = data[cols].to_dict()
+
+
+new = best.copy()
+# loop over each family
+
+f = open("cost_function.txt", "a")
+for fam_id, _ in enumerate(best):
+    # loop over each family choice
+    print('fam_id ',fam_id)
+    f.write('fam_id '+str(fam_id)+'\n')
+    for pick in range(10):
+        day = choice_dict[f'choice_{pick}'][fam_id]
+        temp = new.copy()
+        temp[fam_id] = day # add in the new pick
+        if cost_function(temp) < best_score:
+            new = temp.copy()
+            best_score = cost_function(new)
+    print('best score ', best_score)  
+    f.write('best score' +str(best_score)+'\n')       
+
+f.close()
+score = cost_function(new)
+
+print(f'Score: {score}')
+
+
+data_diff = pd.read_csv(os.path.join(mug_data_path,'familys_difficult.csv'))
+
+
+data_diff_sort=data_diff.sort_values(by='difficulty', ascending=False)
+fam_id=data_diff_sort['family_id'].to_numpy()
+best_sort=data['choice_0'].to_numpy()
+
+best_score=cost_function(best)
+new = best.copy()
+print('init : ',cost_function(new))
+for i in fam_id[:5000]:
+    temp = new.copy()
+    temp[i]=best_sort[i]
+    temp_score=cost_function(temp)
+    
+    if temp_score < best_score:
+        print(i,temp_score)
+        new = temp.copy()
+        best_score = temp_score
+    
+
+
+wk_wd = pd.read_csv(os.path.join(mug_data_path,'difficult_wk_wd.csv'))
+n_expl=10
+a=abs(wk_wd[choices].iloc[fam_id[:n_expl]]-np.full((n_expl,10),1))
+b=data_diff[choices].iloc[fam_id[:n_expl]]
+data_wk_wd=b*a
+
+
+
+
+'''
+data_diff = pd.read_csv(os.path.join(mug_data_path,'familys_difficult.csv'))
+data_diff_sort=data_diff.sort_values(by='difficulty', ascending=False)
+data_diff_sort=data_diff_sort.reset_index(drop=True)
+best_sort=data_diff_sort['choice_0'].to_numpy()
+family_size_dict_sort = data_diff_sort[['n_people']].to_dict()['n_people']
+choice_dict_sort = data_diff_sort[cols].to_dict()
+data_diff_sort['fam_id_cp']=data_diff_sort['family_id']
+data_diff_sort['family_id']=data_diff_sort.index
+cost_function = build_cost_function(data_diff_sort,N_DAYS=100)
+best_score_sort = cost_function(best)
+
+
+for fam_id, _ in enumerate(best_sort):
+    # loop over each family choice
+    print('fam_id ',fam_id)
+
+    for pick in range(10):
+        day = choice_dict_sort[f'choice_{pick}'][fam_id]
+        temp = new.copy()
+        temp[fam_id] = day # add in the new pick
+        if cost_function(temp) < best_score_sort:
+            new = temp.copy()
+            best_score = cost_function(new)
+    print('best score ', best_score)  
+      
+
+
+score = cost_function(new)
+'''
