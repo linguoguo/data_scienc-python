@@ -24,3 +24,6 @@ J'ai mis trop de temps dans le feature enginnering !!!
 J'ai écrit mes propres algorithmes.
 
 
+### memoire_COSTES_GUO
+
+Projet à la fac.
